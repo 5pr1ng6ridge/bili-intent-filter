@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>B站意图过滤器 · 设置</title>
+  <style>
+    :root { --blue: #00a1d6; --pink: #fb7299; --line: #e3e5e7; --sub: #9499a0; --muted: #61666d; --text: #18191c; --bg: #f6f7f8; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); font: 14px/1.6 system-ui, "Microsoft YaHei", sans-serif; color: var(--text); }
+    main { max-width: 720px; margin: 0 auto; padding: 28px 20px 60px; }
+    h1 { margin: 0 0 20px; font-size: 20px; }
+    section { margin-bottom: 16px; padding: 18px 20px; border-radius: 10px; background: #fff; }
+    h2 { margin: 0 0 4px; font-size: 15px; }
+    .desc { margin: 0 0 14px; color: var(--sub); font-size: 13px; }
+    label.field { display: block; margin: 14px 0 6px; font-weight: 600; font-size: 13px; }
+    .hint { font-weight: 400; color: var(--sub); font-size: 12px; }
+    textarea, input[type=text], input[type=password], select {
+      width: 100%; padding: 7px 9px; border: 1px solid var(--line); border-radius: 6px; font: inherit; font-size: 13px; color: inherit; background: #fff;
+    }
+    textarea:focus, input:focus, select:focus { outline: none; border-color: var(--blue); }
+    textarea { height: 64px; resize: vertical; }
+    .row { display: flex; align-items: center; gap: 8px; }
+    .spacer { flex: 1; }
+    [hidden] { display: none !important; }
+
+    button { padding: 6px 14px; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--text); font: inherit; font-size: 13px; cursor: pointer; white-space: nowrap; }
+    button:hover { border-color: var(--blue); color: var(--blue); }
+    button.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+    button.primary:hover { opacity: .9; color: #fff; }
+    button.danger:hover { border-color: #e0552f; color: #e0552f; }
+    button:disabled { opacity: .5; cursor: default; }
+
+    /* 模式标签 */
+    .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .tabs button { border-radius: 16px; padding: 4px 14px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
+    .tabs button[aria-selected="true"] { background: var(--blue); border-color: var(--blue); color: #fff; }
+    .tabs button.active::after { content: " ●"; color: var(--pink); }
+    .tabs button.add { border-style: dashed; color: var(--muted); }
+    #modeName { width: 220px; font-weight: 600; }
+    .current { color: var(--pink); font-size: 12px; }
+    #modeActiveLabel { margin: 0 0 0 4px; font-size: 13px; }
+    input[type=range] { flex: 1; accent-color: var(--blue); }
+    #thresholdVal { width: 40px; text-align: right; font-variant-numeric: tabular-nums; }
+
+    /* 内容类型 */
+    .types { display: grid; gap: 10px; }
+    .type { display: flex; align-items: center; gap: 12px; }
+    .type .name { width: 150px; }
+    .type .name small { display: block; color: var(--sub); font-size: 12px; line-height: 1.3; }
+    .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+    .seg label { position: relative; padding: 4px 12px; font-size: 13px; cursor: pointer; color: var(--muted); }
+    .seg label + label { border-left: 1px solid var(--line); }
+    .seg input { position: absolute; opacity: 0; pointer-events: none; }
+    .seg label:has(input:checked) { background: var(--blue); color: #fff; }
+    .seg label:has(input[value=zero]:checked) { background: var(--pink); }
+    .seg label:has(input:focus-visible) { outline: 2px solid var(--blue); outline-offset: -2px; }
+
+    .check { display: flex; align-items: center; gap: 8px; margin: 6px 0; cursor: pointer; }
+    .check input { margin: 0; accent-color: var(--blue); }
+
+    fieldset { margin: 14px 0 0; padding: 2px 14px 14px; border: 1px solid var(--line); border-radius: 8px; }
+    legend { padding: 0 4px; color: var(--muted); font-size: 12px; }
+    .key { position: relative; }
+    .key input { padding-right: 56px; }
+    .key button { position: absolute; right: 4px; top: 4px; padding: 1px 8px; font-size: 12px; }
+    #testStatus { margin-top: 10px; font-size: 13px; color: var(--muted); white-space: pre-wrap; word-break: break-all; }
+    #testStatus:empty { display: none; }
+    .error { color: #e0552f !important; }
+    .ok { color: #2a9d55 !important; }
+
+    .warn { margin: 0 0 16px; padding: 10px 14px; border-radius: 8px; background: #fff3e0; color: #b25a00; font-size: 13px; }
+    #toast { position: fixed; top: 16px; left: 50%; transform: translate(-50%, -8px); padding: 6px 16px; border-radius: 16px; background: rgba(24, 25, 28, .85); color: #fff; font-size: 13px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; }
+    #toast.show { opacity: 1; transform: translate(-50%, 0); }
+    #toast.error { background: #e0552f; color: #fff !important; }
+    #usageText b { font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+  <div id="toast" role="status"></div>
+  <main>
+    <h1>B站意图过滤器 · 设置</h1>
+    <div id="warn" class="warn" hidden></div>
+
+    <section>
+      <h2>模式</h2>
+      <p class="desc">每个模式是一组“想看什么”，可以同时使用多个：符合其中任一模式的“想看”就算相关，“不想看”和屏蔽关键词合并，阈值取最低。也可以一个都不用，这时只按内容类型过滤。日常在工具栏弹窗里点选，带 <span class="current">●</span> 的是正在使用的模式。修改会自动保存。</p>
+      <div id="modeTabs" class="tabs" role="tablist"></div>
+
+      <div class="row">
+        <input type="text" id="modeName" maxlength="20" aria-label="模式名称" spellcheck="false" />
+        <label class="check" id="modeActiveLabel" title="在弹窗里也可以点选"><input type="checkbox" id="modeActive" />使用中</label>
+        <span class="spacer"></span>
+        <button type="button" id="dupMode">复制</button>
+        <button type="button" id="delMode" class="danger">删除</button>
+      </div>
+
+      <label class="field" for="intent">我想看 <span class="hint">交给决策模型判断相关度，多个用逗号或换行分隔</span></label>
+      <textarea id="intent" placeholder="例如：Rust 入门，系统设计，独立游戏开发"></textarea>
+
+      <label class="field" for="exclude">不想看 <span class="hint">同样交给模型判断，属于这些内容的会被压低分数</span></label>
+      <textarea id="exclude" placeholder="例如：八卦，引战，标题党"></textarea>
+
+      <label class="field" for="keywords">屏蔽关键词 <span class="hint">标题、UP 主或副标题含有任一关键词就直接 0 分，不调用模型。支持 /正则/</span></label>
+      <textarea id="keywords" placeholder="例如：开箱，抽奖，/第\d+期/"></textarea>
+
+      <label class="field" for="threshold">阈值 <span class="hint">分数低于它的内容会被模糊；同时使用多个模式时取最低的那个</span></label>
+      <div class="row">
+        <input type="range" id="threshold" min="0" max="1" step="0.01" />
+        <span id="thresholdVal"></span>
+      </div>
+      <p class="desc" style="margin:10px 0 0">“想看”和“不想看”都留空时，这个模式只按内容类型和关键词过滤，不调用模型。</p>
+    </section>
+
+    <section>
+      <h2>内容类型</h2>
+      <p class="desc">对所有模式生效。“直接 0 分”的内容会被模糊，不调用模型；“不处理”的保持原样。</p>
+      <div id="types" class="types"></div>
+    </section>
+
+    <section>
+      <h2>生效页面</h2>
+      <p class="desc">首页、搜索、播放页、分区、UP 主空间等页面始终生效。下面这些是你自己整理过的内容，默认不过滤。</p>
+      <div id="scopes"></div>
+    </section>
+
+    <section>
+      <h2>决策模型</h2>
+      <p class="desc">给“想看 / 不想看”打分用的模型。</p>
+      <select id="backend" aria-label="决策模型">
+        <option value="jev">Jev（TypeSafe 决策模型）</option>
+        <option value="http">自定义 HTTP 接口</option>
+        <option value="local">内置基线（字面匹配，仅供对照）</option>
+      </select>
+
+      <fieldset id="jevBox">
+        <legend>Jev 接入</legend>
+        <label class="field" for="jevPreset">接入方式</label>
+        <select id="jevPreset"></select>
+        <label class="field" for="jevEndpoint">接口地址</label>
+        <input type="text" id="jevEndpoint" spellcheck="false" />
+        <label class="field" for="jevApiKey">API Key</label>
+        <div class="key">
+          <input type="password" id="jevApiKey" spellcheck="false" autocomplete="off" />
+          <button type="button" data-toggle="jevApiKey">显示</button>
+        </div>
+        <label class="field" for="jevModel">模型</label>
+        <input type="text" id="jevModel" spellcheck="false" />
+      </fieldset>
+
+      <fieldset id="httpBox">
+        <legend>自定义接口</legend>
+        <label class="field" for="endpoint">接口地址</label>
+        <input type="text" id="endpoint" spellcheck="false" />
+        <label class="field" for="apiKey">API Key <span class="hint">可选，以 Bearer 方式发送</span></label>
+        <div class="key">
+          <input type="password" id="apiKey" spellcheck="false" autocomplete="off" />
+          <button type="button" data-toggle="apiKey">显示</button>
+        </div>
+      </fieldset>
+
+      <label class="check" style="margin-top:14px"><input type="checkbox" id="useTags" />拉取视频标签一起判断</label>
+      <p class="desc" style="margin:0 0 0 22px">从 B 站接口读取视频的标签（如“编程”“Python教程”），和标题一起交给模型，判断更准。每个视频多一次对 B 站的请求，标签会缓存；直播、课程等没有标签。</p>
+
+      <div class="row" style="margin-top:14px">
+        <button type="button" id="test">测试连接</button>
+        <span class="hint">用上面的设置和正在编辑的模式给两个示例标题打分；自定义地址会在这里请求访问权限。</span>
+      </div>
+      <div id="testStatus"></div>
+      <p class="desc" style="margin:12px 0 0">API Key 只保存在本机浏览器里（不随账号同步），只会发送到上面填写的接口地址。</p>
+    </section>
+
+    <section>
+      <h2>显示</h2>
+      <label class="check"><input type="checkbox" id="showBadge" />在卡片左上角显示分数角标</label>
+    </section>
+
+    <section>
+      <h2>用量与缓存</h2>
+      <p class="desc">打过分的内容缓存在本机，每个“想看”和合并后的“不想看”分开存：刷新页面、切回或组合用过的模式都不会重复调用。改关键词、内容类型、阈值不会让缓存失效。只有滚动到附近的内容才会送去打分。</p>
+      <div class="row">
+        <div id="usageText" class="spacer"></div>
+        <button type="button" id="clearCache" class="danger">清除缓存</button>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="options.js"></script>
+</body>
+</html>

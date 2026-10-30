@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <style>
+    :root { --blue: #00a1d6; --line: #e3e5e7; --sub: #9499a0; --text: #18191c; }
+    body { width: 300px; margin: 0; padding: 14px 16px 12px; font: 13px/1.5 system-ui, "Microsoft YaHei", sans-serif; color: var(--text); }
+    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    h1 { margin: 0; font-size: 15px; }
+    .label { margin: 0 0 6px; color: #61666d; font-size: 12px; display: flex; justify-content: space-between; }
+    .label .sub { color: var(--sub); }
+    section { margin-bottom: 14px; }
+    section[hidden], [hidden] { display: none !important; }
+
+    .switch { position: relative; width: 34px; height: 20px; flex: none; }
+    .switch input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; z-index: 1; }
+    .switch span { position: absolute; inset: 0; border-radius: 10px; background: #c9ccd0; transition: background .15s; }
+    .switch span::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .15s; }
+    .switch input:checked + span { background: var(--blue); }
+    .switch input:checked + span::after { transform: translateX(14px); }
+    .switch input:focus-visible + span { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chips button { padding: 3px 12px; border: 1px solid var(--line); border-radius: 14px; background: #fff; color: var(--text); font: inherit; cursor: pointer; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .chips button:hover { border-color: var(--blue); color: var(--blue); }
+    .chips button[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+    input[type=range] { width: 100%; margin: 0; accent-color: var(--blue); }
+    input[type=range]:disabled { opacity: .4; }
+    #thresholdVal { font-variant-numeric: tabular-nums; color: var(--text); }
+
+    .note { margin-top: 6px; color: var(--sub); font-size: 12px; }
+    .note a { color: var(--blue); cursor: pointer; text-decoration: none; }
+    .warn { margin: 0 0 12px; padding: 8px 10px; border-radius: 6px; background: #fff3e0; color: #b25a00; font-size: 12px; }
+
+    .stats { padding: 8px 10px; border-radius: 6px; background: #f6f7f8; font-size: 12px; color: #61666d; }
+    .stats div + div { margin-top: 2px; }
+    .stats b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+    footer { display: flex; justify-content: flex-end; }
+    footer button { padding: 4px 10px; border: 0; border-radius: 6px; background: none; color: #61666d; font: inherit; cursor: pointer; }
+    footer button:hover { background: #f1f2f3; color: var(--text); }
+    body.off section:not(.keep) { opacity: .45; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>B站意图过滤器</h1>
+    <label class="switch" title="启用 / 暂停"><input type="checkbox" id="enabled" aria-label="启用" /><span></span></label>
+  </header>
+  <div id="warn" class="warn" hidden></div>
+
+  <section>
+    <div class="label"><span>模式</span><span class="sub">可多选</span></div>
+    <div id="modes" class="chips"></div>
+    <div id="modeHint" class="note" hidden></div>
+  </section>
+
+  <section>
+    <div class="label"><span id="thresholdLabel">阈值</span><span id="thresholdVal"></span></div>
+    <input type="range" id="threshold" min="0" max="1" step="0.01" aria-label="阈值" />
+  </section>
+
+  <section class="stats keep">
+    <div id="page"></div>
+    <div id="usage"></div>
+  </section>
+
+  <footer>
+    <button type="button" id="openOptions">⚙ 设置</button>
+  </footer>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

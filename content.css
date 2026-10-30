@@ -1,0 +1,48 @@
+/* 只给原本是 static 定位的卡片加，避免改动 B 站自己的布局 */
+.bif-rel {
+  position: relative;
+}
+
+/* 只模糊卡片内容，不模糊分数角标。渐变在第一次标记之后才加，命中规则的卡片不会闪一下 */
+.bif-card.bif-anim > :not(.bif-badge) {
+  transition: filter 0.2s, opacity 0.2s;
+}
+
+/* 打分中：先遮住，避免内容一闪而过 */
+.bif-pending > :not(.bif-badge) {
+  filter: blur(6px) grayscale(0.6);
+  opacity: 0.6;
+}
+
+.bif-hidden > :not(.bif-badge) {
+  filter: blur(10px) grayscale(1);
+  opacity: 0.35;
+}
+
+/* 悬停时临时查看 */
+.bif-hidden:hover > :not(.bif-badge) {
+  filter: none;
+  opacity: 1;
+}
+
+.bif-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 10;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font: 600 12px/18px system-ui, sans-serif;
+  color: #fff;
+  background: rgba(0, 161, 214, 0.9);
+  pointer-events: auto;
+  white-space: nowrap;
+}
+
+.bif-hidden > .bif-badge {
+  background: rgba(120, 120, 120, 0.9);
+}
+
+.bif-error > .bif-badge {
+  background: rgba(230, 120, 0, 0.9);
+}
